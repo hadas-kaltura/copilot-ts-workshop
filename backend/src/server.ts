@@ -1,0 +1,44 @@
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Get proper __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Root route
+app.get('/', (req, res) => {
+  res.send('Save the World!');
+});
+
+// API route to fetch superheroes data
+app.get('/api/superheroes', (req, res) => {
+  const dataPath = path.join(__dirname, '../data/superheroes.json');
+  fs.readFile(dataPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading superheroes data:', err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    res.json(JSON.parse(data));
+  });
+});
+
+// Simple server start without complex promise handling
+const server = app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+}).on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`Port ${PORT} is busy, trying ${PORT + 1}`);
+    app.listen(Number(PORT) + 1);
+  } else {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+});
+
+export default app;
