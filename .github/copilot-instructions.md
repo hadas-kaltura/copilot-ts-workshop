@@ -33,4 +33,4 @@
 - When generating new files, follow the established folder structure.
 - For backend, use ESM import/export syntax.
 - For frontend, use modern React (hooks, functional components).
-- For tests, use the same frameworks and match the style of existing tests.
+- For tests, use the same frameworks and match the style of existing tests, and generate comprehensive test coverage, including edge cases, exception handling and data validation

@@ -3,6 +3,22 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
+interface PowerStats {
+  intelligence: number;
+  strength: number;
+  speed: number;
+  durability: number;
+  power: number;
+  combat: number;
+}
+
+interface Superhero {
+  id: number;
+  name: string;
+  image: string;
+  powerstats: PowerStats;
+}
+
 /** 
 This is a superheroes API server that supports 3 GET endpoints
 The data is stored in a JSON file in the project folder called superheroes.json
@@ -33,7 +49,7 @@ const PORT = process.env.TEST_PORT || process.env.PORT || 3000;
  *   console.error('Failed to load superheroes:', error);
  * }
  */
-const loadSuperheroes = () => {
+const loadSuperheroes = (): Promise<Superhero[]> => {
   const dataPath = path.join(__dirname, '../data/superheroes.json');
   return new Promise((resolve, reject) => {
     fs.readFile(dataPath, 'utf8', (err, data) => {
@@ -52,9 +68,9 @@ app.get('/', (req, res) => {
 });
 
 // API route to fetch superheroes data
-app.get('/api/superheroes', async (req, res) => {
+app.get('/api/superheroes', async (_req, res) => {
   try {
-    const superheroes = await loadSuperheroes();
+    const superheroes: Superhero[] = await loadSuperheroes();
     res.json(superheroes);
   } catch (err) {
     console.error('Error reading superheroes data:', err);
@@ -66,7 +82,7 @@ app.get('/api/superheroes', async (req, res) => {
 app.get('/api/superheroes/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const superheroes = await loadSuperheroes();
+    const superheroes: Superhero[] = await loadSuperheroes();
     const superhero = superheroes.find(hero => String(hero.id) === String(id));
     if (!superhero) {
       return res.status(404).send('Superhero not found');
@@ -81,7 +97,7 @@ app.get('/api/superheroes/:id', async (req, res) => {
 app.get('/api/superheroes/:id/powerstats', async (req, res) => {
   const { id } = req.params;
   try {
-    const superheroes = await loadSuperheroes();
+    const superheroes: Superhero[] = await loadSuperheroes();
     const superhero = superheroes.find(hero => String(hero.id) === String(id));
     if (!superhero) {
       return res.status(404).send('Superhero not found');
