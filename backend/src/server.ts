@@ -16,15 +16,18 @@ interface Superhero {
   id: number;
   name: string;
   image: string;
+  team: string | null;
   powerstats: PowerStats;
 }
 
 /** 
-This is a superheroes API server that supports 3 GET endpoints
+This is a superheroes API server that supports multiple endpoints
 The data is stored in a JSON file in the project folder called superheroes.json
 1. /superheroes/all - returns a list of all superheroes, as a JSON array
 2. /superheroes/:id - returns a specific superhero by id, as a JSON object
-3. /superheroes/:id/powerstats - returns a the powers statistics for superhero by id, as a JSON object
+3. /superheroes/:id/powerstats - returns the powers statistics for superhero by id, as a JSON object
+4. /superheroes/:id/assign-team - assigns a team to a superhero
+5. /superheroes/team/:teamName - filters superheroes by team
 */
 
 // Get proper __dirname equivalent in ESM
@@ -58,6 +61,20 @@ const loadSuperheroes = (): Promise<Superhero[]> => {
         return;
       }
       resolve(JSON.parse(data));
+    });
+  });
+};
+
+// Utility function to save superheroes data
+const saveSuperheroes = async (superheroes: Superhero[]): Promise<void> => {
+  const dataPath = path.join(__dirname, '../data/superheroes.json');
+  return new Promise((resolve, reject) => {
+    fs.writeFile(dataPath, JSON.stringify(superheroes, null, 2), 'utf8', (err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
     });
   });
 };
@@ -107,8 +124,53 @@ app.get('/api/superheroes/:id/powerstats', async (req, res) => {
     console.error('Error reading superheroes data:', err);
     res.status(500).send('Internal Server Error');
   }
-}
-);
+});
+
+// API route to assign a team to a superhero
+app.put('/api/superheroes/:id/assign-team', express.json(), async (req, res) => {
+  const { id } = req.params;
+  const { team } = req.body;
+
+  if (!team) {
+    return res.status(400).send('Team name is required');
+  }
+
+  try {
+    const superheroes: Superhero[] = await loadSuperheroes();
+    const superheroIndex = superheroes.findIndex(hero => String(hero.id) === String(id));
+    
+    if (superheroIndex === -1) {
+      return res.status(404).send('Superhero not found');
+    }
+
+    superheroes[superheroIndex].team = team;
+    await saveSuperheroes(superheroes);
+    res.json(superheroes[superheroIndex]);
+  } catch (err) {
+    console.error('Error updating superhero team:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// API route to filter superheroes by team
+app.get('/api/superheroes/team/:teamName', async (req, res) => {
+  const { teamName } = req.params;
+  try {
+    const superheroes: Superhero[] = await loadSuperheroes();
+    const teamHeroes = superheroes.filter(hero => 
+      hero.team?.toLowerCase() === teamName.toLowerCase()
+    );
+    
+    if (teamHeroes.length === 0) {
+      return res.status(404).send('No superheroes found for this team');
+    }
+    
+    res.json(teamHeroes);
+  } catch (err) {
+    console.error('Error reading superheroes data:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 // Start the server only if not in test environment
 if (process.env.NODE_ENV !== 'test') {

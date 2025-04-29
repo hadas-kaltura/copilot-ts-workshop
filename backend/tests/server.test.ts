@@ -118,3 +118,65 @@ describe('GET /api/superheroes/:id/powerstats', () => {
     expect(response.text).toBe('Internal Server Error');
   });
 });
+
+describe('PUT /api/superheroes/:id/assign-team', () => {
+  it('should assign a team to a superhero', async () => {
+    const response = await request(app)
+      .put('/api/superheroes/1/assign-team')
+      .send({ team: 'Justice League' });
+    
+    expect(response.status).toBe(200);
+    expect(response.body.team).toBe('Justice League');
+  });
+
+  it('should return 400 if team name is missing', async () => {
+    const response = await request(app)
+      .put('/api/superheroes/1/assign-team')
+      .send({});
+    
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Team name is required');
+  });
+
+  it('should return 404 if superhero does not exist', async () => {
+    const response = await request(app)
+      .put('/api/superheroes/9999/assign-team')
+      .send({ team: 'Justice League' });
+    
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('Superhero not found');
+  });
+});
+
+describe('GET /api/superheroes/team/:teamName', () => {
+  it('should return all superheroes in a team', async () => {
+    const response = await request(app)
+      .get('/api/superheroes/team/Avengers');
+    
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    response.body.forEach((hero: any) => {
+      expect(hero.team.toLowerCase()).toBe('avengers');
+    });
+  });
+
+  it('should return 404 if no superheroes found in team', async () => {
+    const response = await request(app)
+      .get('/api/superheroes/team/NonExistentTeam');
+    
+    expect(response.status).toBe(404);
+    expect(response.text).toBe('No superheroes found for this team');
+  });
+
+  it('should handle internal server error gracefully', async () => {
+    readFileSpy.mockImplementationOnce((_, __, cb: ReadFileCallback) => {
+      cb(new Error('fail'), null);
+    });
+
+    const response = await request(app)
+      .get('/api/superheroes/team/Avengers');
+    
+    expect(response.status).toBe(500);
+    expect(response.text).toBe('Internal Server Error');
+  });
+});
