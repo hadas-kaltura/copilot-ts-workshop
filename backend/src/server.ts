@@ -28,17 +28,12 @@ app.get('/api/superheroes', (req, res) => {
   });
 });
 
-// Simple server start without complex promise handling
-const server = app.listen(PORT, () => {
+// Start the server
+app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-}).on('error', (err: NodeJS.ErrnoException) => {
-  if (err.code === 'EADDRINUSE') {
-    console.log(`Port ${PORT} is busy, trying ${Number(PORT) + 1}`);
-    app.listen(Number(PORT) + 1);
-  } else {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  }
+}).on('error', (err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
 });
 
 export default app;
