@@ -4,6 +4,7 @@
     "types": ["jest", "node"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "isolatedModules": true,
     "esModuleInterop": true,
     "outDir": "./dist",
     "strict": true,
