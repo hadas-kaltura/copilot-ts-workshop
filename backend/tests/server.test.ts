@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../src/server';
 import fs from 'fs';
 import { describe, expect, it, jest } from '@jest/globals';
+import { PathOrFileDescriptor } from 'fs';
 
 process.env.TEST_PORT = '3002'; // Set the test port
 
@@ -28,7 +29,24 @@ describe('GET /api/superheroes', () => {
   });
 
   it('should handle file read errors gracefully', async () => {
-    jest.spyOn(fs, 'readFile').mockImplementation((_, __, cb) => cb(new Error('fail'), null));
+    // Mock with the correct signature
+    jest.spyOn(fs, 'readFile').mockImplementation((
+      path: PathOrFileDescriptor,
+      options: BufferEncoding | { encoding?: BufferEncoding, flag?: string } | undefined | null | ((err: NodeJS.ErrnoException | null, data: Buffer) => void),
+      callback?: (err: NodeJS.ErrnoException | null, data: Buffer | string) => void
+    ): any => {
+      // Handle the case where options is the callback
+      if (typeof options === 'function') {
+        options(new Error('fail') as NodeJS.ErrnoException, Buffer.from(''));
+        return undefined;
+      }
+      // Handle the case where callback is provided
+      if (callback) {
+        callback(new Error('fail') as NodeJS.ErrnoException, Buffer.from(''));
+      }
+      return undefined;
+    });
+    
     const response = await request(app).get('/api/superheroes');
     expect(response.status).toBe(500);
     expect(response.text).toBe('Internal Server Error');
@@ -51,7 +69,24 @@ describe('GET /api/superheroes/:id', () => {
   });
 
   it('should handle file read errors gracefully', async () => {
-    jest.spyOn(fs, 'readFile').mockImplementation((_, __, cb) => cb(new Error('fail'), null));
+    // Mock with the correct signature
+    jest.spyOn(fs, 'readFile').mockImplementation((
+      path: PathOrFileDescriptor,
+      options: BufferEncoding | { encoding?: BufferEncoding, flag?: string } | undefined | null | ((err: NodeJS.ErrnoException | null, data: Buffer) => void),
+      callback?: (err: NodeJS.ErrnoException | null, data: Buffer | string) => void
+    ): any => {
+      // Handle the case where options is the callback
+      if (typeof options === 'function') {
+        options(new Error('fail') as NodeJS.ErrnoException, Buffer.from(''));
+        return undefined;
+      }
+      // Handle the case where callback is provided
+      if (callback) {
+        callback(new Error('fail') as NodeJS.ErrnoException, Buffer.from(''));
+      }
+      return undefined;
+    });
+    
     const response = await request(app).get('/api/superheroes/1');
     expect(response.status).toBe(500);
     expect(response.text).toBe('Internal Server Error');
@@ -80,14 +115,28 @@ describe('GET /api/superheroes/:id/powerstats', () => {
   it('should return 404 if superhero exists but has no powerstats', async () => {
     // Mock the data to simulate missing powerstats
     const originalReadFile = fs.readFile;
-    jest.spyOn(fs, 'readFile').mockImplementation((_, __, cb) => {
-      cb(
-        null,
-        JSON.stringify([
+    // Mock with the correct signature
+    jest.spyOn(fs, 'readFile').mockImplementation((
+      path: PathOrFileDescriptor,
+      options: BufferEncoding | { encoding?: BufferEncoding, flag?: string } | undefined | null | ((err: NodeJS.ErrnoException | null, data: Buffer) => void),
+      callback?: (err: NodeJS.ErrnoException | null, data: Buffer | string) => void
+    ): any => {
+      // Handle the case where options is the callback
+      if (typeof options === 'function') {
+        options(null, Buffer.from(JSON.stringify([
           { id: 123, name: 'NoStats', image: '', powerstats: null }
-        ])
-      );
+        ])));
+        return undefined;
+      }
+      // Handle the case where callback is provided
+      if (callback) {
+        callback(null, Buffer.from(JSON.stringify([
+          { id: 123, name: 'NoStats', image: '', powerstats: null }
+        ])));
+      }
+      return undefined;
     });
+    
     const response = await request(app).get('/api/superheroes/123/powerstats');
     expect(response.status).toBe(404);
     expect(response.text).toBe('Power stats not found for this superhero');
@@ -96,7 +145,24 @@ describe('GET /api/superheroes/:id/powerstats', () => {
   });
 
   it('should handle file read errors gracefully', async () => {
-    jest.spyOn(fs, 'readFile').mockImplementation((_, __, cb) => cb(new Error('fail'), null));
+    // Mock with the correct signature
+    jest.spyOn(fs, 'readFile').mockImplementation((
+      path: PathOrFileDescriptor,
+      options: BufferEncoding | { encoding?: BufferEncoding, flag?: string } | undefined | null | ((err: NodeJS.ErrnoException | null, data: Buffer) => void),
+      callback?: (err: NodeJS.ErrnoException | null, data: Buffer | string) => void
+    ): any => {
+      // Handle the case where options is the callback
+      if (typeof options === 'function') {
+        options(new Error('fail') as NodeJS.ErrnoException, Buffer.from(''));
+        return undefined;
+      }
+      // Handle the case where callback is provided
+      if (callback) {
+        callback(new Error('fail') as NodeJS.ErrnoException, Buffer.from(''));
+      }
+      return undefined;
+    });
+    
     const response = await request(app).get('/api/superheroes/1/powerstats');
     expect(response.status).toBe(500);
     expect(response.text).toBe('Internal Server Error');

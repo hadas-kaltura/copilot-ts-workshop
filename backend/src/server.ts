@@ -6,11 +6,28 @@ import { fileURLToPath } from 'url';
 /**
 This is a superheroes API server that supports 3 GET endpoints
 The data is stored in a JSON file in the project folder called superheroes.json
-1. /superheroes/all - returns a list of all superheroes, as a JSON array
-2. /superheroes/:id - returns a specific superhero by id, as a JSON object
-3. /superheroes/:id/powerstats - returns a the powers statistics for superhero
+1. /api/superheroes - returns a list of all superheroes, as a JSON array
+2. /api/superheroes/:id - returns a specific superhero by id, as a JSON object
+3. /api/superheroes/:id/powerstats - returns a the powers statistics for superhero
 by id, as a JSON object
 */
+
+// Define interfaces for type safety
+interface PowerStats {
+  intelligence: number;
+  strength: number;
+  speed: number;
+  durability: number;
+  power: number;
+  combat: number;
+}
+
+interface Superhero {
+  id: number;
+  name: string;
+  image: string;
+  powerstats: PowerStats | null;
+}
 
 // Get proper __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -28,10 +45,10 @@ app.get('/', (req, res) => {
 /**
  * Loads superhero data from a JSON file.
  *
- * @returns {Promise<any>} A promise that resolves with the parsed superhero data
+ * @returns {Promise<Superhero[]>} A promise that resolves with the parsed superhero data
  *                         or rejects with an error if the file cannot be read.
  */
-const loadSuperheroes = (): Promise<any> => {
+const loadSuperheroes = (): Promise<Superhero[]> => {
   return new Promise((resolve, reject) => {
     const dataPath = path.join(__dirname, '../data/superheroes.json');
     fs.readFile(dataPath, 'utf8', (err, data) => {
@@ -60,7 +77,7 @@ app.get('/api/superheroes/:id', async (req, res) => {
   const superheroId = req.params.id;
   try {
     const superheroes = await loadSuperheroes();
-    const superhero = superheroes.find((hero: any) => hero.id.toString() === superheroId);
+    const superhero = superheroes.find((hero) => hero.id.toString() === superheroId);
     if (superhero) {
       res.json(superhero);
     } else {
@@ -77,7 +94,7 @@ app.get('/api/superheroes/:id/powerstats', async (req, res) => {
   const superheroId = req.params.id;
   try {
     const superheroes = await loadSuperheroes();
-    const superhero = superheroes.find((hero: any) => hero.id.toString() === superheroId);
+    const superhero = superheroes.find((hero) => hero.id.toString() === superheroId);
     if (superhero) {
       const powerstats = superhero.powerstats;
       if (powerstats) {
