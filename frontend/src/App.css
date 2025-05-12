@@ -25,5 +25,94 @@ table {
 th, td {
   padding: 12px;
   border: 1px solid #444;
-  pointer-events: none;
+}
+
+/* Fix for checkbox clickability */
+td > label, td > input[type="checkbox"] {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Styles for selected rows */
+tr.selected {
+  background-color: rgba(65, 105, 225, 0.3);
+}
+
+/* Comparison View Styles */
+.comparison-view {
+  background-color: #282c34;
+  min-height: 100vh;
+  padding: 20px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.comparison-container {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 1200px;
+  margin: 20px 0;
+}
+
+.hero-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+}
+
+.stats-column {
+  flex: 1;
+  min-width: 300px;
+  padding: 0 20px;
+}
+
+.comparison-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  margin: 15px 0;
+}
+
+.comparison-table {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.winning-stat {
+  font-weight: bold;
+  color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.comparison-result {
+  width: 80%;
+  max-width: 800px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background-color: #61dafb;
+  color: #282c34;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #4fa8ff;
 }
