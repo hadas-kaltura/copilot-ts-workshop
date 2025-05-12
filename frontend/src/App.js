@@ -45,6 +45,7 @@ function App() {
             ))}
           </tbody>
         </table>
+        <button style={{ marginTop: '20px' }} aria-label="Add Hero">Add Hero</button>
       </header>
     </div>
   );
